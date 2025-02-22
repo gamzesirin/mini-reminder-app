@@ -13,6 +13,7 @@ function createWindow() {
 		minWidth: 1024,
 		minHeight: 768,
 		frame: false,
+		icon: path.join(__dirname, 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,

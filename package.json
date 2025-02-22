@@ -13,6 +13,7 @@
 	},
 	"devDependencies": {
 		"electron": "^28.1.0",
-		"electron-builder": "^24.9.1"
+		"electron-builder": "^24.9.1",
+		"sharp": "^0.33.5"
 	}
 }
