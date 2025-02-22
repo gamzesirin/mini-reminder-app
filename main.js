@@ -11,24 +11,64 @@ function createWindow() {
 		height: 700,
 		webPreferences: {
 			nodeIntegration: true,
-			contextIsolation: false
+			contextIsolation: false,
+			sandbox: false,
+			webSecurity: true,
+			devTools: true
 		}
 	})
 
+	// CSP başlığını ayarla
+	mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+		callback({
+			responseHeaders: {
+				...details.responseHeaders,
+				'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com"]
+			}
+		})
+	})
+
 	mainWindow.loadFile('index.html')
+
+	// DevTools'u aç (geliştirme sırasında)
+	mainWindow.webContents.openDevTools()
+
+	// Sayfa yüklendiğinde
+	mainWindow.webContents.on('did-finish-load', () => {
+		mainWindow.webContents.executeJavaScript(`
+			document.querySelectorAll('input, select, textarea').forEach(el => {
+				el.removeAttribute('disabled');
+				el.removeAttribute('readonly');
+			});
+		`)
+	})
+
+	// Hata ayıklama için
+	mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+		console.error('Sayfa yükleme hatası:', errorCode, errorDescription)
+	})
+
+	mainWindow.webContents.on('console-message', (event, level, message) => {
+		console.log('Renderer Process Log:', message)
+	})
 }
 
-app.whenReady().then(createWindow)
+// Uygulama hazır olduğunda
+app.whenReady().then(() => {
+	createWindow()
 
+	// macOS için pencere yönetimi
+	app.on('activate', () => {
+		if (BrowserWindow.getAllWindows().length === 0) {
+			createWindow()
+		}
+	})
+})
+
+// Tüm pencereler kapandığında
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit()
-	}
-})
-
-app.on('activate', () => {
-	if (BrowserWindow.getAllWindows().length === 0) {
-		createWindow()
 	}
 })
 
@@ -53,36 +93,22 @@ ipcMain.handle('createEncryptedFolder', async (event, { password, method }) => {
 })
 
 // Şifre kaydetme fonksiyonu
-ipcMain.handle('savePassword', async (event, { title, username, email, password, masterPassword }) => {
+ipcMain.handle('savePassword', async (event, { title, username, email, password }) => {
 	const userDataPath = app.getPath('userData')
-	const encryptedFolderPath = path.join(userDataPath, 'encrypted_passwords')
-	const configPath = path.join(encryptedFolderPath, 'config.json')
-
-	// Config dosyasını kontrol et
-	const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
-
-	// Ana şifreyi doğrula
-	if (CryptoJS.SHA256(masterPassword).toString() !== config.passwordHash) {
-		throw new Error('Hatalı ana şifre!')
-	}
-
-	// Şifreyi encrypt et
-	const encryptedData = CryptoJS.AES.encrypt(
-		JSON.stringify({ title, username, email, password }),
-		masterPassword
-	).toString()
-
-	// Şifreyi kaydet
-	const passwordsPath = path.join(encryptedFolderPath, 'passwords.json')
+	const passwordsPath = path.join(userDataPath, 'passwords.json')
 	let passwords = []
 
 	if (fs.existsSync(passwordsPath)) {
 		passwords = JSON.parse(fs.readFileSync(passwordsPath, 'utf8'))
 	}
 
+	// Yeni şifreyi ekle
 	passwords.push({
 		id: Date.now(),
-		data: encryptedData
+		title,
+		username,
+		email,
+		password
 	})
 
 	fs.writeFileSync(passwordsPath, JSON.stringify(passwords))
@@ -90,52 +116,26 @@ ipcMain.handle('savePassword', async (event, { title, username, email, password,
 })
 
 // Şifreleri getirme fonksiyonu
-ipcMain.handle('getPasswords', async (event, masterPassword) => {
+ipcMain.handle('getPasswords', async () => {
 	const userDataPath = app.getPath('userData')
-	const encryptedFolderPath = path.join(userDataPath, 'encrypted_passwords')
-	const passwordsPath = path.join(encryptedFolderPath, 'passwords.json')
-	const configPath = path.join(encryptedFolderPath, 'config.json')
-
-	// Config dosyasını kontrol et
-	const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
-
-	// Ana şifreyi doğrula
-	if (CryptoJS.SHA256(masterPassword).toString() !== config.passwordHash) {
-		throw new Error('Hatalı ana şifre!')
-	}
+	const passwordsPath = path.join(userDataPath, 'passwords.json')
 
 	if (!fs.existsSync(passwordsPath)) {
 		return []
 	}
 
 	const passwords = JSON.parse(fs.readFileSync(passwordsPath, 'utf8'))
-
-	// Şifreleri decrypt et
-	return passwords.map((item) => {
-		const decrypted = CryptoJS.AES.decrypt(item.data, masterPassword).toString(CryptoJS.enc.Utf8)
-		return {
-			id: item.id,
-			...JSON.parse(decrypted)
-		}
-	})
+	return passwords
 })
 
 // Yedekleme fonksiyonu
-ipcMain.handle('backupPasswords', async (event, { masterPassword, backupType }) => {
+ipcMain.handle('backupPasswords', async (event, { backupType }) => {
 	const userDataPath = app.getPath('userData')
-	const encryptedFolderPath = path.join(userDataPath, 'encrypted_passwords')
-	const passwordsPath = path.join(encryptedFolderPath, 'passwords.json')
-	const configPath = path.join(encryptedFolderPath, 'config.json')
+	const passwordsPath = path.join(userDataPath, 'passwords.json')
 
-	// Config ve şifre dosyasının varlığını kontrol et
-	if (!fs.existsSync(configPath) || !fs.existsSync(passwordsPath)) {
+	// Şifre dosyasının varlığını kontrol et
+	if (!fs.existsSync(passwordsPath)) {
 		throw new Error('Yedeklenecek veri bulunamadı!')
-	}
-
-	// Ana şifreyi doğrula
-	const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
-	if (CryptoJS.SHA256(masterPassword).toString() !== config.passwordHash) {
-		throw new Error('Hatalı ana şifre!')
 	}
 
 	// Yedekleme klasörünü oluştur
@@ -153,7 +153,6 @@ ipcMain.handle('backupPasswords', async (event, { masterPassword, backupType }) 
 	// Yedek dosyasını oluştur
 	const backupData = {
 		passwords: JSON.parse(fs.readFileSync(passwordsPath, 'utf8')),
-		config: config,
 		backupDate: date.toISOString(),
 		backupType: backupType
 	}
@@ -186,49 +185,33 @@ ipcMain.handle('backupPasswords', async (event, { masterPassword, backupType }) 
 })
 
 // Şifre silme fonksiyonu
-ipcMain.handle('deletePassword', async (event, { id, masterPassword }) => {
+ipcMain.handle('deletePassword', async (event, { id }) => {
 	const userDataPath = app.getPath('userData')
-	const encryptedFolderPath = path.join(userDataPath, 'encrypted_passwords')
-	const passwordsPath = path.join(encryptedFolderPath, 'passwords.json')
-	const configPath = path.join(encryptedFolderPath, 'config.json')
+	const passwordsPath = path.join(userDataPath, 'passwords.json')
 
-	// Ana şifreyi doğrula
-	const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
-	if (CryptoJS.SHA256(masterPassword).toString() !== config.passwordHash) {
-		throw new Error('Hatalı ana şifre!')
+	if (!fs.existsSync(passwordsPath)) {
+		throw new Error('Şifre bulunamadı!')
 	}
 
-	// Şifreleri oku ve güncelle
-	const passwords = JSON.parse(fs.readFileSync(passwordsPath, 'utf8'))
-	const updatedPasswords = passwords.filter((item) => item.id !== id)
+	let passwords = JSON.parse(fs.readFileSync(passwordsPath, 'utf8'))
+	passwords = passwords.filter((item) => item.id !== id)
 
-	fs.writeFileSync(passwordsPath, JSON.stringify(updatedPasswords))
+	fs.writeFileSync(passwordsPath, JSON.stringify(passwords))
 	return true
 })
 
 // Şifre güncelleme fonksiyonu
-ipcMain.handle('updatePassword', async (event, { id, title, username, email, password, masterPassword }) => {
+ipcMain.handle('updatePassword', async (event, { id, title, username, email, password }) => {
 	const userDataPath = app.getPath('userData')
-	const encryptedFolderPath = path.join(userDataPath, 'encrypted_passwords')
-	const passwordsPath = path.join(encryptedFolderPath, 'passwords.json')
-	const configPath = path.join(encryptedFolderPath, 'config.json')
+	const passwordsPath = path.join(userDataPath, 'passwords.json')
 
-	// Ana şifreyi doğrula
-	const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
-	if (CryptoJS.SHA256(masterPassword).toString() !== config.passwordHash) {
-		throw new Error('Hatalı ana şifre!')
+	if (!fs.existsSync(passwordsPath)) {
+		throw new Error('Şifre bulunamadı!')
 	}
 
-	// Yeni veriyi şifrele
-	const encryptedData = CryptoJS.AES.encrypt(
-		JSON.stringify({ title, username, email, password }),
-		masterPassword
-	).toString()
+	let passwords = JSON.parse(fs.readFileSync(passwordsPath, 'utf8'))
+	passwords = passwords.map((item) => (item.id === id ? { id, title, username, email, password } : item))
 
-	// Şifreleri oku ve güncelle
-	const passwords = JSON.parse(fs.readFileSync(passwordsPath, 'utf8'))
-	const updatedPasswords = passwords.map((item) => (item.id === id ? { id, data: encryptedData } : item))
-
-	fs.writeFileSync(passwordsPath, JSON.stringify(updatedPasswords))
+	fs.writeFileSync(passwordsPath, JSON.stringify(passwords))
 	return true
 })
