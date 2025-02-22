@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const CryptoJS = require('crypto-js')
+require('@electron/remote/main').initialize()
 
 let mainWindow
 
@@ -11,16 +12,19 @@ function createWindow() {
 		height: 800,
 		minWidth: 1024,
 		minHeight: 768,
+		frame: false,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
+			enableRemoteModule: true,
 			sandbox: false,
 			webSecurity: true,
 			devTools: true
 		}
 	})
 
-	// CSP başlığını ayarla
+	require('@electron/remote/main').enable(mainWindow.webContents)
+
 	mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
 		callback({
 			responseHeaders: {
@@ -32,10 +36,6 @@ function createWindow() {
 
 	mainWindow.loadFile('index.html')
 
-	// DevTools'u aç (geliştirme sırasında)
-	mainWindow.webContents.openDevTools()
-
-	// Sayfa yüklendiğinde
 	mainWindow.webContents.on('did-finish-load', () => {
 		mainWindow.webContents.executeJavaScript(`
 			document.querySelectorAll('input, select, textarea').forEach(el => {
@@ -45,7 +45,6 @@ function createWindow() {
 		`)
 	})
 
-	// Hata ayıklama için
 	mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
 		console.error('Sayfa yükleme hatası:', errorCode, errorDescription)
 	})
@@ -59,7 +58,6 @@ function createWindow() {
 app.whenReady().then(() => {
 	createWindow()
 
-	// macOS için pencere yönetimi
 	app.on('activate', () => {
 		if (BrowserWindow.getAllWindows().length === 0) {
 			createWindow()
@@ -74,7 +72,6 @@ app.on('window-all-closed', () => {
 	}
 })
 
-// Şifreli klasör işlemleri için gerekli fonksiyonlar
 ipcMain.handle('createEncryptedFolder', async (event, { password, method }) => {
 	const userDataPath = app.getPath('userData')
 	const encryptedFolderPath = path.join(userDataPath, 'encrypted_passwords')
@@ -104,7 +101,6 @@ ipcMain.handle('savePassword', async (event, { title, username, email, password 
 		passwords = JSON.parse(fs.readFileSync(passwordsPath, 'utf8'))
 	}
 
-	// Yeni şifreyi ekle
 	passwords.push({
 		id: Date.now(),
 		title,
@@ -135,12 +131,10 @@ ipcMain.handle('backupPasswords', async (event, { backupType }) => {
 	const userDataPath = app.getPath('userData')
 	const passwordsPath = path.join(userDataPath, 'passwords.json')
 
-	// Şifre dosyasının varlığını kontrol et
 	if (!fs.existsSync(passwordsPath)) {
 		throw new Error('Yedeklenecek veri bulunamadı!')
 	}
 
-	// Yedekleme klasörünü oluştur
 	const backupsPath = path.join(userDataPath, 'backups')
 	if (!fs.existsSync(backupsPath)) {
 		fs.mkdirSync(backupsPath)
@@ -150,9 +144,8 @@ ipcMain.handle('backupPasswords', async (event, { backupType }) => {
 	const backupFileName = `backup_${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date
 		.getDate()
 		.toString()
-		.padStart(2, '0')}.json`
+		.padStart(2, '0')}_${backupType}.json`
 
-	// Yedek dosyasını oluştur
 	const backupData = {
 		passwords: JSON.parse(fs.readFileSync(passwordsPath, 'utf8')),
 		backupDate: date.toISOString(),

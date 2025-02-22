@@ -8,6 +8,7 @@
 		"build": "electron-builder"
 	},
 	"dependencies": {
+		"@electron/remote": "^2.1.2",
 		"crypto-js": "^4.2.0"
 	},
 	"devDependencies": {

@@ -8,40 +8,181 @@
 			content="script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com"
 		/>
 		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				darkMode: 'class',
+				theme: {
+					extend: {
+						colors: {
+							bitwarden: {
+								50: '#f5f7ff',
+								100: '#ebf0fe',
+								200: '#ced9fd',
+								300: '#b1c2fc',
+								400: '#7694fa',
+								500: '#3b66f8',
+								600: '#355cdf',
+								700: '#2c4dba',
+								800: '#233d95',
+								900: '#1d327a'
+							}
+						}
+					}
+				}
+			}
+		</script>
 	</head>
-	<body class="bg-gray-100">
-		<div class="container mx-auto px-4 py-8 max-w-md">
-			<div id="setupForm" class="bg-white rounded-lg shadow-md p-6">
-				<h2 class="text-2xl font-bold text-gray-800 mb-6">Şifre Yöneticisi Kurulum</h2>
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">Şifreleme Yöntemi:</label>
-					<select
-						id="encryptionMethod"
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						<option value="aes">AES</option>
-						<option value="des">DES</option>
-					</select>
-				</div>
-				<div class="mb-6">
-					<label class="block text-gray-700 text-sm font-bold mb-2">Ana Şifre:</label>
-					<input
-						type="password"
-						id="masterPassword"
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-					/>
-				</div>
-				<button
-					onclick="setupEncryption()"
-					class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200"
-				>
-					Kurulumu Tamamla
+	<body class="bg-gray-900 text-gray-100 min-h-screen">
+		<!-- Özel Başlık Çubuğu -->
+		<div class="bg-gray-800 p-2 flex justify-between items-center draggable">
+			<div class="flex items-center space-x-2">
+				<svg class="w-6 h-6 text-bitwarden-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+					></path>
+				</svg>
+				<span class="text-sm font-semibold italic">Şifre Yöneticisi</span>
+			</div>
+			<div class="flex items-center space-x-2">
+				<button onclick="minimizeWindow()" class="text-gray-400 hover:text-gray-300">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+					</svg>
+				</button>
+				<button onclick="maximizeWindow()" class="text-gray-400 hover:text-gray-300">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 3h8a2 2 0 012 2v14a2 2 0 01-2 2H8a2 2 0 01-2-2V5a2 2 0 012-2z"
+						></path>
+					</svg>
+				</button>
+				<button onclick="closeWindow()" class="text-gray-400 hover:text-red-500">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
 				</button>
 			</div>
 		</div>
 
+		<div class="flex items-center justify-center h-[calc(100vh-40px)]">
+			<div class="max-w-md w-full">
+				<div class="mb-8">
+					<svg class="w-16 h-16 text-bitwarden-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+						></path>
+					</svg>
+					<h2 class="text-3xl font-bold text-gray-100">Şifre Yöneticisi</h2>
+					<p class="text-gray-400 mt-2">Güvenli bir başlangıç için kurulumu tamamlayın</p>
+				</div>
+
+				<div id="setupForm" class="bg-gray-800 rounded-lg shadow-lg p-6">
+					<div class="space-y-6">
+						<div>
+							<label class="block text-sm font-medium text-gray-300 mb-2">Şifreleme Yöntemi</label>
+							<select
+								id="encryptionMethod"
+								class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-bitwarden-500"
+							>
+								<option value="aes">AES (Gelişmiş Şifreleme Standardı)</option>
+								<option value="des">DES (Veri Şifreleme Standardı)</option>
+							</select>
+						</div>
+						<div>
+							<label class="block text-sm font-medium text-gray-300 mb-2">Ana Şifre</label>
+							<div class="relative">
+								<input
+									type="password"
+									id="masterPassword"
+									class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-bitwarden-500"
+									placeholder="Güçlü bir şifre girin"
+								/>
+								<button
+									type="button"
+									onclick="togglePasswordVisibility()"
+									class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+								>
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+										></path>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+										></path>
+									</svg>
+								</button>
+							</div>
+						</div>
+						<button
+							onclick="setupEncryption()"
+							class="w-full bg-bitwarden-500 hover:bg-bitwarden-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2"
+						>
+							<span>Kurulumu Tamamla</span>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M13 7l5 5m0 0l-5 5m5-5H6"
+								></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<style>
+			.draggable {
+				-webkit-app-region: drag;
+			}
+
+			button {
+				-webkit-app-region: no-drag;
+			}
+		</style>
+
 		<script>
 			const { ipcRenderer } = require('electron')
+			const remote = require('@electron/remote')
+
+			function minimizeWindow() {
+				remote.getCurrentWindow().minimize()
+			}
+
+			function maximizeWindow() {
+				const win = remote.getCurrentWindow()
+				if (win.isMaximized()) {
+					win.unmaximize()
+				} else {
+					win.maximize()
+				}
+			}
+
+			function closeWindow() {
+				remote.getCurrentWindow().close()
+			}
+
+			function togglePasswordVisibility() {
+				const passwordInput = document.getElementById('masterPassword')
+				const type = passwordInput.type
+				passwordInput.type = type === 'password' ? 'text' : 'password'
+			}
 
 			async function setupEncryption() {
 				const password = document.getElementById('masterPassword').value
@@ -57,7 +198,6 @@
 						password,
 						method
 					})
-					alert('Kurulum başarılı!')
 					window.location.href = 'passwords.html'
 				} catch (error) {
 					alert('Bir hata oluştu: ' + error.message)
