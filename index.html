@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Şifre Yöneticisi</title>
+		<meta charset="UTF-8" />
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				padding: 20px;
+			}
+			.container {
+				max-width: 600px;
+				margin: 0 auto;
+			}
+			.form-group {
+				margin-bottom: 15px;
+			}
+			.form-group label {
+				display: block;
+				margin-bottom: 5px;
+			}
+			.form-group input,
+			.form-group select {
+				width: 100%;
+				padding: 8px;
+			}
+			button {
+				padding: 10px 20px;
+				background-color: #4caf50;
+				color: white;
+				border: none;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div id="setupForm">
+				<h2>Şifre Yöneticisi Kurulum</h2>
+				<div class="form-group">
+					<label>Şifreleme Yöntemi:</label>
+					<select id="encryptionMethod">
+						<option value="aes">AES</option>
+						<option value="des">DES</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label>Ana Şifre:</label>
+					<input type="password" id="masterPassword" />
+				</div>
+				<button onclick="setupEncryption()">Kurulumu Tamamla</button>
+			</div>
+		</div>
+
+		<script>
+			const { ipcRenderer } = require('electron')
+
+			async function setupEncryption() {
+				const password = document.getElementById('masterPassword').value
+				const method = document.getElementById('encryptionMethod').value
+
+				if (!password) {
+					alert('Lütfen bir şifre girin!')
+					return
+				}
+
+				try {
+					await ipcRenderer.invoke('createEncryptedFolder', {
+						password,
+						method
+					})
+					alert('Kurulum başarılı!')
+					window.location.href = 'passwords.html'
+				} catch (error) {
+					alert('Bir hata oluştu: ' + error.message)
+				}
+			}
+		</script>
+	</body>
+</html>

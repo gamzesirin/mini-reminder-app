@@ -1,0 +1,17 @@
+{
+	"name": "password-manager",
+	"version": "1.0.0",
+	"description": "Güvenli Şifre Yöneticisi",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron .",
+		"build": "electron-builder"
+	},
+	"dependencies": {
+		"crypto-js": "^4.2.0"
+	},
+	"devDependencies": {
+		"electron": "^28.1.0",
+		"electron-builder": "^24.9.1"
+	}
+}
