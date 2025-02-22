@@ -8,16 +8,21 @@ const icoPath = path.join(__dirname, '..', 'assets', 'icon.ico')
 
 // SVG'yi PNG'ye dönüştür
 sharp(svgPath)
+	.resize(256, 256)
 	.png()
-	.toFile(pngPath)
-	.then(() => {
+	.toBuffer()
+	.then((data) => {
+		// PNG dosyasını kaydet
+		fs.writeFileSync(pngPath, data)
 		console.log('PNG oluşturuldu')
 
 		// PNG'yi ICO'ya dönüştür
 		sharp(pngPath)
 			.resize(256, 256)
-			.toFile(icoPath)
-			.then(() => {
+			.toFormat('ico')
+			.toBuffer()
+			.then((icoData) => {
+				fs.writeFileSync(icoPath, icoData)
 				console.log('ICO oluşturuldu')
 			})
 			.catch((err) => console.error('ICO oluşturma hatası:', err))

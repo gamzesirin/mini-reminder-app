@@ -5,15 +5,28 @@
 	"main": "main.js",
 	"scripts": {
 		"start": "electron .",
-		"build": "electron-builder"
+		"build": "electron-builder",
+		"pack": "electron-builder --dir"
 	},
+	"build": {
+		"appId": "com.sifre.yoneticisi",
+		"productName": "Şifre Yöneticisi",
+		"directories": {
+			"output": "dist"
+		},
+		"win": {
+			"target": "nsis"
+		}
+	},
+	"author": "gamzesirin",
+	"license": "ISC",
 	"dependencies": {
 		"@electron/remote": "^2.1.2",
-		"crypto-js": "^4.2.0"
+		"crypto-js": "^4.2.0",
+		"sharp": "^0.33.5"
 	},
 	"devDependencies": {
 		"electron": "^28.1.0",
-		"electron-builder": "^24.9.1",
-		"sharp": "^0.33.5"
+		"electron-builder": "^24.9.1"
 	}
 }
