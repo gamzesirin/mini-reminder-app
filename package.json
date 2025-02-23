@@ -15,8 +15,7 @@
 			"output": "dist"
 		},
 		"win": {
-			"target": "nsis",
-			"icon": "assets/icon.png"
+			"target": "nsis"
 		},
 		"nsis": {
 			"oneClick": false,
@@ -24,9 +23,6 @@
 			"createDesktopShortcut": true,
 			"createStartMenuShortcut": true,
 			"shortcutName": "Şifre Yöneticisi",
-			"installerIcon": "assets/icon.png",
-			"uninstallerIcon": "assets/icon.png",
-			"installerHeaderIcon": "assets/icon.png",
 			"menuCategory": true,
 			"displayLanguageSelector": true,
 			"perMachine": true,
