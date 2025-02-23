@@ -15,7 +15,22 @@
 			"output": "dist"
 		},
 		"win": {
-			"target": "nsis"
+			"target": "nsis",
+			"icon": "assets/icon.png"
+		},
+		"nsis": {
+			"oneClick": false,
+			"allowToChangeInstallationDirectory": true,
+			"createDesktopShortcut": true,
+			"createStartMenuShortcut": true,
+			"shortcutName": "Şifre Yöneticisi",
+			"installerIcon": "assets/icon.png",
+			"uninstallerIcon": "assets/icon.png",
+			"installerHeaderIcon": "assets/icon.png",
+			"menuCategory": true,
+			"displayLanguageSelector": true,
+			"perMachine": true,
+			"runAfterFinish": true
 		}
 	},
 	"author": "gamzesirin",
