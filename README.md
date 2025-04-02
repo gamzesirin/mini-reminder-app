@@ -37,7 +37,7 @@ Dosya yapısı:
 1. Projeyi klonlayın:
 
 ```bash
-git clone [repo-url]
+git clone https://github.com/gamzesirin/mini-reminder-app
 cd password-manager
 ```
 
