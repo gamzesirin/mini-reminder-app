@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Şifre Yöneticisi - Giriş</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+				darkMode: 'class',
+				theme: {
+					extend: {
+						colors: {
+							bitwarden: {
+								50: '#f5f7ff',
+								100: '#ebf0fe',
+								200: '#ced9fd',
+								300: '#b1c2fc',
+								400: '#7694fa',
+								500: '#3b66f8',
+								600: '#355cdf',
+								700: '#2c4dba',
+								800: '#233d95',
+								900: '#1d327a'
+							}
+						}
+					}
+				}
+			}
+		</script>
+	</head>
+	<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+		<!-- Üst Başlık Çubuğu -->
+		<div class="bg-gray-800 p-4">
+			<div class="container mx-auto flex items-center">
+				<svg class="w-8 h-8 text-bitwarden-500 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<path d="M12 2L4 7v10c0 4 8 5 8 5s8-1 8-5V7l-8-5z" stroke-width="1.5" />
+					<path d="M12 6a3 3 0 00-3 3v2h6V9a3 3 0 00-3-3z" stroke-width="1.5" />
+					<path d="M12 16v-3" stroke-width="2" stroke-linecap="round" />
+				</svg>
+				<h1 class="text-xl font-bold">Şifre Yöneticisi</h1>
+			</div>
+		</div>
+
+		<!-- Ana İçerik -->
+		<div class="flex-1 flex items-center justify-center p-6">
+			<div class="w-full max-w-md bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+				<div class="p-8">
+					<h2 class="text-2xl font-bold text-center mb-8">Hesabınıza Giriş Yapın</h2>
+					
+					<!-- Hata/Başarı mesaj alanı -->
+					<div id="messageBox" class="hidden mb-6"></div>
+					
+					<!-- Giriş Seçenekleri Toggle -->
+					<div class="flex mb-6 bg-gray-700 rounded-lg overflow-hidden">
+						<button 
+							id="standardLoginBtn" 
+							onclick="toggleLoginMethod('standard')" 
+							class="flex-1 py-2 px-4 text-center font-medium bg-gray-600 text-white transition-all duration-200"
+						>
+							Standart Giriş
+						</button>
+						<button 
+							id="metamaskLoginBtn" 
+							onclick="toggleLoginMethod('metamask')" 
+							class="flex-1 py-2 px-4 text-center font-medium text-gray-300 hover:text-white transition-all duration-200"
+						>
+							MetaMask ile Giriş
+						</button>
+					</div>
+					
+					<!-- Standart Giriş Formu -->
+					<div id="standardLoginForm" class="space-y-6">
+						<div>
+							<label for="userId" class="block text-sm font-medium text-gray-300 mb-2">Kullanıcı ID</label>
+							<input
+								type="text"
+								id="userId"
+								class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-bitwarden-500"
+								placeholder="Kurulum sırasında oluşturulan ID'niz"
+							/>
+						</div>
+						
+						<div>
+							<label for="masterPassword" class="block text-sm font-medium text-gray-300 mb-2">Ana Şifre</label>
+							<div class="relative">
+								<input
+									type="password"
+									id="masterPassword"
+									class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-bitwarden-500"
+									placeholder="••••••••"
+								/>
+								<button
+									type="button"
+									onclick="togglePasswordVisibility('masterPassword')"
+									class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+								>
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+										></path>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+										></path>
+									</svg>
+								</button>
+							</div>
+						</div>
+						
+						<div class="flex items-center">
+							<input
+								type="checkbox"
+								id="rememberMe"
+								class="text-bitwarden-500 focus:ring-bitwarden-500 rounded"
+							/>
+							<label for="rememberMe" class="ml-2 text-sm text-gray-300">Beni hatırla</label>
+						</div>
+						
+						<button
+							onclick="login()"
+							class="w-full bg-bitwarden-500 hover:bg-bitwarden-600 text-white px-4 py-3 rounded-lg transition duration-200 font-medium"
+						>
+							Giriş Yap
+						</button>
+					</div>
+					
+					<!-- MetaMask Giriş Formu -->
+					<div id="metamaskLoginForm" class="space-y-6 hidden">
+						<div class="bg-gray-700 rounded-lg p-4 text-center">
+							<img src="https://metamask.io/images/metamask-fox.svg" alt="MetaMask" class="w-16 h-16 mx-auto mb-3">
+							<p class="text-gray-300 mb-4">MetaMask cüzdanınızla bağlanarak güvenli giriş yapın.</p>
+							<button
+								onclick="connectWithMetaMask()"
+								class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg transition duration-200 font-medium flex items-center justify-center"
+							>
+								<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+								</svg>
+								MetaMask ile Bağlan
+							</button>
+						</div>
+						
+						<div id="metamaskAddress" class="hidden bg-gray-700 rounded-lg p-4">
+							<p class="text-sm text-gray-400 mb-1">Bağlı Cüzdan Adresi:</p>
+							<p id="connectedAddress" class="font-mono text-sm text-gray-200 break-all"></p>
+						</div>
+					</div>
+					
+					<div class="text-center mt-6">
+						<a href="index.html" class="text-bitwarden-400 hover:underline text-sm">
+							Hesabınız yok mu? Yeni bir hesap oluşturun.
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				// Enter tuşuna basıldığında giriş yap
+				document.getElementById('masterPassword').addEventListener('keyup', function(event) {
+					if (event.key === 'Enter') {
+						login();
+					}
+				});
+				
+				// MetaMask varlığını kontrol et
+				checkMetaMaskAvailability();
+			});
+			
+			function checkMetaMaskAvailability() {
+				if (typeof window.ethereum === 'undefined') {
+					document.getElementById('metamaskLoginBtn').classList.add('opacity-50');
+					document.getElementById('metamaskLoginBtn').setAttribute('disabled', 'true');
+					document.getElementById('metamaskLoginBtn').title = 'MetaMask yüklü değil';
+				}
+			}
+			
+			function toggleLoginMethod(method) {
+				// Butonların görünümünü güncelle
+				if (method === 'standard') {
+					document.getElementById('standardLoginBtn').classList.add('bg-gray-600');
+					document.getElementById('standardLoginBtn').classList.add('text-white');
+					document.getElementById('metamaskLoginBtn').classList.remove('bg-gray-600');
+					document.getElementById('metamaskLoginBtn').classList.remove('text-white');
+					document.getElementById('metamaskLoginBtn').classList.add('text-gray-300');
+					
+					// Formları göster/gizle
+					document.getElementById('standardLoginForm').classList.remove('hidden');
+					document.getElementById('metamaskLoginForm').classList.add('hidden');
+				} else {
+					document.getElementById('metamaskLoginBtn').classList.add('bg-gray-600');
+					document.getElementById('metamaskLoginBtn').classList.add('text-white');
+					document.getElementById('standardLoginBtn').classList.remove('bg-gray-600');
+					document.getElementById('standardLoginBtn').classList.remove('text-white');
+					document.getElementById('standardLoginBtn').classList.add('text-gray-300');
+					
+					// Formları göster/gizle
+					document.getElementById('standardLoginForm').classList.add('hidden');
+					document.getElementById('metamaskLoginForm').classList.remove('hidden');
+				}
+			}
+
+			function togglePasswordVisibility(inputId) {
+				const passwordInput = document.getElementById(inputId);
+				passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+			}
+
+			function showMessage(message, isError = false) {
+				const messageBox = document.getElementById('messageBox');
+				messageBox.textContent = message;
+				messageBox.className = isError 
+					? "mb-6 p-4 rounded-lg bg-red-500/10 text-red-500"
+					: "mb-6 p-4 rounded-lg bg-green-500/10 text-green-500";
+				messageBox.classList.remove('hidden');
+				
+				if (!isError) {
+					setTimeout(() => {
+						messageBox.classList.add('hidden');
+					}, 3000);
+				}
+			}
+
+			async function login() {
+				const userId = document.getElementById('userId').value.trim();
+				const masterPassword = document.getElementById('masterPassword').value;
+				
+				if (!userId || !masterPassword) {
+					showMessage('Kullanıcı ID ve ana şifre zorunludur!', true);
+					return;
+				}
+				
+				try {
+					showMessage('Giriş yapılıyor...', false);
+					
+					const response = await fetch('/api/login', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ userId, masterPassword }),
+                        credentials: 'include'
+					});
+					
+					const data = await response.json();
+					
+					if (response.ok && data.success) {
+						showMessage('Giriş başarılı! Yönlendiriliyorsunuz...');
+						setTimeout(() => {
+							window.location.href = '/passwords.html';
+						}, 1000);
+					} else {
+						showMessage(data.error || 'Giriş başarısız!', true);
+					}
+				} catch (error) {
+					console.error('Giriş hatası:', error);
+					showMessage('Bir hata oluştu: ' + error.message, true);
+				}
+			}
+			
+			async function connectWithMetaMask() {
+				if (typeof window.ethereum === 'undefined') {
+					showMessage('MetaMask yüklü değil! Lütfen MetaMask eklentisini tarayıcınıza yükleyin.', true);
+					return;
+				}
+				
+				try {
+					showMessage('MetaMask bağlanıyor...', false);
+					
+					// Hesapları iste
+					const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+					const address = accounts[0];
+					
+					if (!address) {
+						showMessage('MetaMask bağlantısı başarısız oldu!', true);
+						return;
+					}
+					
+					// Bağlı adresi göster
+					document.getElementById('connectedAddress').textContent = address;
+					document.getElementById('metamaskAddress').classList.remove('hidden');
+					
+					// İmzalama isteği (kimlik doğrulama için)
+					const timestamp = new Date().getTime();
+					const message = `Şifre Yöneticisi uygulamasına giriş: ${timestamp}`;
+					
+					showMessage('Lütfen MetaMask imzalama isteğini onaylayın...', false);
+					
+					const signature = await window.ethereum.request({
+						method: 'personal_sign',
+						params: [
+							message,
+							address
+						]
+					});
+					
+					// İmza ile sunucuya giriş isteği gönder
+					const response = await fetch('/api/login/metamask', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ 
+							address,
+							message,
+							signature
+						}),
+                        credentials: 'include'
+					});
+					
+					const data = await response.json();
+					
+					if (response.ok && data.success) {
+						showMessage('MetaMask ile giriş başarılı! Yönlendiriliyorsunuz...');
+						setTimeout(() => {
+							window.location.href = '/passwords.html';
+						}, 1000);
+					} else {
+						showMessage(data.error || 'MetaMask ile giriş başarısız!', true);
+					}
+					
+				} catch (error) {
+					console.error('MetaMask bağlantı hatası:', error);
+					
+					// Kullanıcının reddettiği durumu kontrol et
+					if (error.code === 4001) {
+						showMessage('MetaMask bağlantı isteği reddedildi!', true);
+					} else {
+						showMessage('Bir hata oluştu: ' + error.message, true);
+					}
+				}
+			}
+		</script>
+	</body>
+</html> 

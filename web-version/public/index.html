@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Şifre Yöneticisi - Kurulum</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bitwarden: {
+                            50: '#f5f7ff',
+                            100: '#ebf0fe',
+                            200: '#ced9fd',
+                            300: '#b1c2fc',
+                            400: '#7694fa',
+                            500: '#3b66f8',
+                            600: '#355cdf',
+                            700: '#2c4dba',
+                            800: '#233d95',
+                            900: '#1d327a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+    <!-- Üst Başlık Çubuğu -->
+    <div class="bg-gray-800 p-4">
+        <div class="container mx-auto flex items-center">
+            <svg class="w-8 h-8 text-bitwarden-500 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 2L4 7v10c0 4 8 5 8 5s8-1 8-5V7l-8-5z" stroke-width="1.5" />
+                <path d="M12 6a3 3 0 00-3 3v2h6V9a3 3 0 00-3-3z" stroke-width="1.5" />
+                <path d="M12 16v-3" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <h1 class="text-xl font-bold">Şifre Yöneticisi</h1>
+        </div>
+    </div>
+
+    <!-- Ana İçerik -->
+    <div class="flex-1 flex items-center justify-center p-6">
+        <div class="w-full max-w-md bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-center mb-8">Kurulum</h2>
+                
+                <!-- Hata/Başarı mesaj alanı -->
+                <div id="messageBox" class="hidden mb-6"></div>
+                
+                <div id="setupForm" class="space-y-6">
+                    <div>
+                        <label for="encryptionMethod" class="block text-sm font-medium text-gray-300 mb-2">Şifreleme Yöntemi</label>
+                        <select
+                            id="encryptionMethod"
+                            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-bitwarden-500"
+                        >
+                            <option value="AES">AES - Gelişmiş Şifreleme Standardı</option>
+                            <option value="DES">DES - Veri Şifreleme Standardı</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-400">Bu, verilerinizi şifrelemek için kullanılacak şifreleme algoritmasıdır.</p>
+                    </div>
+                    
+                    <div>
+                        <label for="masterPassword" class="block text-sm font-medium text-gray-300 mb-2">Ana Şifre</label>
+                        <div class="relative">
+                            <input
+                                type="password"
+                                id="masterPassword"
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-bitwarden-500"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onclick="togglePasswordVisibility('masterPassword')"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    ></path>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    ></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-400">Bu şifreyi unutmayın! Kurumsal bir şifre yöneticisi olduğu için, kaybolursa kurtarma seçeneği yoktur.</p>
+                    </div>
+
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-2">Şifreyi Onayla</label>
+                        <div class="relative">
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-bitwarden-500"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onclick="togglePasswordVisibility('confirmPassword')"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    ></path>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    ></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button
+                        onclick="setupEncryption()"
+                        class="w-full bg-bitwarden-500 hover:bg-bitwarden-600 text-white px-4 py-3 rounded-lg transition duration-200 font-medium mt-8"
+                    >
+                        Kurulumu Tamamla
+                    </button>
+
+                    <div class="text-center mt-4">
+                        <a href="login.html" class="text-bitwarden-400 hover:underline text-sm">
+                            Zaten bir hesabınız var mı? Giriş yapın.
+                        </a>
+                    </div>
+                </div>
+
+                <div id="setupComplete" class="hidden text-center py-8">
+                    <svg class="w-20 h-20 text-green-500 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                    <h3 class="text-xl font-bold mb-4">Kurulum Tamamlandı!</h3>
+                    <p class="text-gray-400 mb-8">
+                        Şifre yöneticiniz başarıyla kuruldu.
+                    </p>
+                    <div class="bg-gray-700 p-4 rounded-lg mb-6">
+                        <h4 class="text-sm font-medium text-gray-300 mb-2">Kullanıcı ID'niz (Bu bilgiyi kaydedin)</h4>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="userId" 
+                                readonly 
+                                class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-gray-100"
+                            />
+                            <button
+                                onclick="copyUserId()"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                                    ></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="mt-2 text-sm text-red-400">Bu ID, hesabınıza erişmek için gereklidir. Lütfen güvenli bir yerde saklayın!</p>
+                    </div>
+                    <a
+                        href="login.html"
+                        class="bg-bitwarden-500 hover:bg-bitwarden-600 text-white px-6 py-3 rounded-lg transition duration-200 font-medium inline-block"
+                    >
+                        Giriş Sayfasına Git
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Kurulum durumunu kontrol et
+            try {
+                const response = await fetch('/api/setup-status');
+                const data = await response.json();
+                
+                if (data.isComplete) {
+                    // Eğer kurulum tamamlanmışsa, giriş sayfasına yönlendir
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Kurulum durumu kontrolü sırasında hata:', error);
+            }
+        });
+
+        function togglePasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+        }
+
+        function showMessage(message, isError = false) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = isError 
+                ? "mb-6 p-4 rounded-lg bg-red-500/10 text-red-500"
+                : "mb-6 p-4 rounded-lg bg-green-500/10 text-green-500";
+            messageBox.classList.remove('hidden');
+            
+            if (!isError) {
+                setTimeout(() => {
+                    messageBox.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        function copyUserId() {
+            const userIdField = document.getElementById('userId');
+            userIdField.select();
+            document.execCommand('copy');
+            showMessage('Kullanıcı ID panoya kopyalandı!');
+        }
+
+        async function setupEncryption() {
+            const encryptionMethod = document.getElementById('encryptionMethod').value;
+            const masterPassword = document.getElementById('masterPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!masterPassword) {
+                showMessage('Ana şifre gereklidir!', true);
+                return;
+            }
+            
+            if (masterPassword !== confirmPassword) {
+                showMessage('Şifreler eşleşmiyor!', true);
+                return;
+            }
+            
+            if (masterPassword.length < 8) {
+                showMessage('Ana şifre en az 8 karakter olmalıdır!', true);
+                return;
+            }
+            
+            try {
+                showMessage('Kurulum yapılıyor...', false);
+                
+                const response = await fetch('/api/setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ encryptionMethod, masterPassword })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Kullanıcı ID'sini göster
+                    document.getElementById('userId').value = data.userId;
+                    
+                    // Kurulum formunu gizle, tamamlandı mesajını göster
+                    document.getElementById('setupForm').classList.add('hidden');
+                    document.getElementById('setupComplete').classList.remove('hidden');
+                } else {
+                    showMessage(data.error || 'Kurulum başarısız oldu!', true);
+                }
+            } catch (error) {
+                console.error('Kurulum hatası:', error);
+                showMessage('Bir hata oluştu: ' + error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

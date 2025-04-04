@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "crypto-js": "^4.2.0",
+    "ethers": "^5.7.2",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1"
+  }
+}
